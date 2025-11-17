@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>❤Love you❤</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;overflow:hidden;background:linear-gradient(135deg,#ffeef8,#e0c3fc);font-family:-apple-system,PingFang SC,Helvetica,Arial;position:relative}
+    .bubble{
+      position:absolute;background:#fff;border-radius:1em;box-shadow:0 .4em 1.2em rgba(0,0,0,.18), 0 .1em .3em rgba(0,0,0,.1);
+      color:#333;opacity:0;transform:scale(.3) rotate(var(--r));animation:pop .6s cubic-bezier(.18,.89,.32,1.28) forwards;
+      display:flex;align-items:center;justify-content:center;padding:.6em 1em;max-width:90vw;max-height:90vh;word-break:break-all;
+    }
+    @keyframes pop{0%{opacity:0;transform:scale(.3) rotate(var(--r));}60%{opacity:1;transform:scale(1.05) rotate(var(--r));}100%{opacity:1;transform:scale(1) rotate(var(--r));}}
+  </style>
+</head>
+<body>
+<!-- 初始蒙层：点我❤ -->
+<div id="mask" style="position:fixed;inset:0;background:rgba(0, 0, 0, 0.6);color:#fff;display:flex;align-items:center;justify-content:center;z-index:9999;font-size:6vw;cursor:pointer;">点我❤</div>
+
+<script>
+/* ========== 音乐：相对路径 + 点屏播放 ========== */
+const bgmSrc = 'https://m701.music.126.net/20251105215628/ab6dc808f5251bd1fe78eb4425c0a43d/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/14096444542/bafc/a068/39f8/9a9e06e5634410b5e7e81df24749e656.mp3?vuutv=txY1SvxDNImkGQ4yZ+NJP5D3fH/ASYJPUsWgwg7fKqCCErZKDy30gG8BkfBYl9N2wf6z4rU5ImuzCfEKrxj2/A75kGTzgdRN2en+hSJkHK+M3K+gnHofU39/y0qKonCNFyenCbbf7yMFtUiqI2bVJA==&cdntag=bWFyaz1vc193ZWIscXVhbGl0eV9zdGFuZGFyZA';   // ① 放同目录 ② 英文 ③ 无空格
+const bgm = new Audio(bgmSrc);
+bgm.loop = true;
+
+/* ========== 气泡参数 ========== */
+const cfg = { bubbleWidth: 45, bubbleHeight: 9, fontSize: 3, eachCount: 1 };
+const rawTips = ["我想你了","别熬夜","保持微笑呀","刘雨婷是最棒的","顺顺利利","每天都要元气满满","早点休息","天冷了，多穿衣服","记得吃水果","多喝水哦~","别焦虑哦","我爱你！！！！","一直爱你","多想我","我们会一直在一起",'我们永远不要分开','不开心就要说出来哦！','宝宝最棒啦！！','爱你~❤❤❤','不要内耗哦~'];
+let tips = []; for (let i = 0; i < cfg.eachCount; i++) tips = tips.concat(rawTips); function shuffle(arr){ for (let i = arr.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; } tips = shuffle(tips); function random(min, max){ return Math.random() * (max - min) + min; }
+
+/* ========== 气泡：限数 + 定时淘汰（无动画自毁） ========== */
+const queue = [];          // 生成顺序队列
+const MAX   = 80;         // 同时存在上限
+
+function spawn(){
+  if (tips.length === 0) tips = shuffle([...rawTips]);
+  const div = document.createElement('div');
+  div.className = 'bubble';
+  div.textContent = tips.pop();
+  div.style.width = cfg.bubbleWidth + 'vw';
+  div.style.height = cfg.bubbleHeight + 'vh';
+  div.style.fontSize = cfg.fontSize + 'vw';
+  const rot = random(-20, 20);
+  div.style.setProperty('--r', rot + 'deg');
+  const pad = 0.5;
+  const maxLeft = 100 - cfg.bubbleWidth - pad;
+  const maxTop  = 100 - cfg.bubbleHeight - pad;
+  const left = random(pad, Math.max(pad, maxLeft));
+  const top  = random(pad, Math.max(pad, maxTop));
+  div.style.left = left + 'vw';
+  div.style.top  = top + 'vh';
+
+  document.body.appendChild(div);
+  queue.push(div);          // 入队
+  if (queue.length > MAX) { const first = queue.shift(); if (first) first.remove(); }
+}
+
+/* ========== 点我❤：点击后才开始播放 + 生成气泡 ========== */
+const mask = document.getElementById('mask');
+document.body.addEventListener('touchstart', () => {
+  mask && mask.remove();           // 蒙层消失
+  bgm.muted = false;               // 解除静音
+  bgm.play().catch(()=>{});        // 开始播放
+  setInterval(spawn, 250);         // 启动气泡循环
+}, { once: true });
+</script>
+</body>
+</html>
+
